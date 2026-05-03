@@ -5,7 +5,7 @@ FlowDesk is a high-fidelity, full-stack collaborative task management platform d
 ![FlowDesk Preview](https://via.placeholder.com/1200x600/1A1A2E/00FFD1?text=FlowDesk+Premium+Task+Management)
 
 ## 🚀 Live Demo
-**[Insert Railway Link Here]**
+flowdesk-production-cde1.up.railway.app
 
 ---
 
