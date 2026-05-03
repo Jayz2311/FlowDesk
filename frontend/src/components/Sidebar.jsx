@@ -16,8 +16,8 @@ const Sidebar = () => {
   return (
     <div className="sidebar glass-panel">
       <div className="sidebar-header">
-        <div className="logo-icon"></div>
-        <h2>TaskFlow</h2>
+        <div className="logo-icon" style={{ background: 'linear-gradient(to right, #00FFD1, #00A8FF)' }}></div>
+        <h2 style={{ fontFamily: '"Clash Display", sans-serif', letterSpacing: '0.5px' }}>FlowDesk</h2>
       </div>
       
       <div className="sidebar-nav">

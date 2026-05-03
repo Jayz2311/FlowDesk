@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { Plus, UserPlus } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import KanbanBoard from '../components/KanbanBoard';
+import MembersPanel from '../components/MembersPanel';
 import './ProjectDetails.css';
 
 const ProjectDetails = () => {
@@ -10,9 +12,11 @@ const ProjectDetails = () => {
   const { user } = useAuth();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('tasks');
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showMemberModal, setShowMemberModal] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'Medium', status: 'To Do', assigneeId: '' });
+  const [editingTask, setEditingTask] = useState(null);
+  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'Medium', status: 'To Do', assigneeId: '', dueDate: '' });
   const [newMemberEmail, setNewMemberEmail] = useState('');
 
   const fetchProjectDetails = async () => {
@@ -33,13 +37,42 @@ const ProjectDetails = () => {
   const handleCreateTask = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/tasks', { ...newTask, projectId: id });
+      if (editingTask) {
+        await api.patch(`/tasks/${editingTask.id}`, newTask);
+      } else {
+        await api.post('/tasks', { ...newTask, projectId: id });
+      }
+      
       setShowTaskModal(false);
-      setNewTask({ title: '', description: '', priority: 'Medium', status: 'To Do', assigneeId: '' });
+      setEditingTask(null);
+      setNewTask({ title: '', description: '', priority: 'Medium', status: 'To Do', assigneeId: '', dueDate: '' });
       fetchProjectDetails();
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      fetchProjectDetails();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Failed to delete task');
+    }
+  };
+
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setNewTask({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      status: task.status,
+      assigneeId: task.assigneeId || '',
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
+    });
+    setShowTaskModal(true);
   };
 
   const handleAddMember = async (e) => {
@@ -70,22 +103,36 @@ const ProjectDetails = () => {
 
   const columns = ['To Do', 'In Progress', 'Done'];
 
+  const getAvatarColor = (name) => {
+    const colors = ['#6366f1', '#8b5cf6', '#d946ef', '#f43f5e', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   return (
     <div className="project-details-container">
       <div className="page-header flex-between">
-        <div>
-          <h1>{project.name}</h1>
+        <div className="title-area">
+          <div className="project-title-row">
+            <h1>{project.name}</h1>
+            {isAdmin && <span className="admin-project-badge">Admin Mode</span>}
+          </div>
           <p>{project.description}</p>
         </div>
         <div className="header-actions">
           {isAdmin && (
-            <button className="btn btn-secondary" onClick={() => setShowMemberModal(true)}>
-              <UserPlus size={20} /> Add Member
-            </button>
+            <>
+              <button className="btn btn-secondary" onClick={() => setShowMemberModal(true)}>
+                <UserPlus size={20} /> Add Member
+              </button>
+              <button className="btn btn-primary" onClick={() => setShowTaskModal(true)}>
+                <Plus size={20} /> Add Task
+              </button>
+            </>
           )}
-          <button className="btn btn-primary" onClick={() => setShowTaskModal(true)}>
-            <Plus size={20} /> Add Task
-          </button>
         </div>
       </div>
 
@@ -93,51 +140,61 @@ const ProjectDetails = () => {
         <span className="members-label">Team Members:</span>
         <div className="members-list">
           {project.members.map(m => (
-             <div key={m.userId} className="member-avatar" title={`${m.user.name} (${m.role})`}>
+             <div 
+               key={m.userId} 
+               className="member-avatar" 
+               title={`${m.user.name} (${m.role})`}
+               style={{ backgroundColor: getAvatarColor(m.user.name) }}
+             >
                {m.user.name.charAt(0).toUpperCase()}
              </div>
           ))}
         </div>
       </div>
 
-      <div className="kanban-board">
-        {columns.map(status => (
-          <div key={status} className="kanban-column glass-panel">
-            <h3 className="column-title">
-              {status} <span className="task-count">{project.tasks.filter(t => t.status === status).length}</span>
-            </h3>
-            <div className="task-list">
-              {project.tasks.filter(t => t.status === status).map(task => (
-                <div key={task.id} className="task-card">
-                  <div className="task-header">
-                    <h4>{task.title}</h4>
-                    <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>{task.priority}</span>
-                  </div>
-                  <p className="task-desc">{task.description}</p>
-                  <div className="task-footer">
-                    <span className="task-assignee">
-                      {task.assignee ? task.assignee.name : 'Unassigned'}
-                    </span>
-                    <select 
-                      value={task.status} 
-                      onChange={(e) => updateTaskStatus(task.id, e.target.value)}
-                      className="status-select"
-                    >
-                      {columns.map(col => <option key={col} value={col}>{col}</option>)}
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="tabs-container">
+        <button 
+          className={`tab-btn ${activeTab === 'tasks' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('tasks')}
+        >
+          Board
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'members' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('members')}
+        >
+          Team
+        </button>
       </div>
+
+      {activeTab === 'tasks' ? (
+        <div className="kanban-wrapper animate-fade-in" style={{ marginTop: '2rem' }}>
+          <KanbanBoard 
+            tasks={project.tasks} 
+            onStatusChange={updateTaskStatus} 
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            isAdmin={isAdmin}
+            userId={user.id}
+          />
+        </div>
+      ) : (
+        <div className="members-wrapper animate-fade-in" style={{ marginTop: '2rem' }}>
+          <MembersPanel 
+            projectId={id} 
+            members={project.members} 
+            tasks={project.tasks} 
+            onUpdate={fetchProjectDetails} 
+            isAdmin={isAdmin} 
+          />
+        </div>
+      )}
 
       {/* Task Modal */}
       {showTaskModal && (
         <div className="modal-overlay">
           <div className="modal-content glass-panel animate-fade-in">
-            <h2>Create New Task</h2>
+            <h2>{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
             <form onSubmit={handleCreateTask}>
               <div className="form-group">
                 <label className="form-label">Task Title</label>
@@ -177,9 +234,22 @@ const ProjectDetails = () => {
                   </select>
                 </div>
               </div>
+              <div className="form-group">
+                <label className="form-label">Due Date</label>
+                <input 
+                  type="date" 
+                  className="form-control" 
+                  value={newTask.dueDate}
+                  onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
+                />
+              </div>
               <div className="modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowTaskModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create Task</button>
+                <button type="button" className="btn btn-secondary" onClick={() => {
+                  setShowTaskModal(false);
+                  setEditingTask(null);
+                  setNewTask({ title: '', description: '', priority: 'Medium', status: 'To Do', assigneeId: '', dueDate: '' });
+                }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingTask ? 'Save Changes' : 'Create Task'}</button>
               </div>
             </form>
           </div>

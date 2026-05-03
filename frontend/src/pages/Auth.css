@@ -1,62 +1,373 @@
-.auth-container {
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+
+.auth-split-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1A1A2E;
+  color: #fff;
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+/* LEFT SIDE - BRAND & ARTWORK */
+.auth-left {
+  flex: 1;
+  position: relative;
+  display: none;
+  background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .auth-left {
+    display: flex;
+  }
+}
+
+.auth-left-content {
+  position: relative;
+  z-index: 10;
+  max-width: 480px;
+  padding: 40px;
+}
+
+.logo-text {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #00FFD1, #00A8FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.hero-text {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  margin-bottom: 4rem;
+  line-height: 1.5;
+}
+
+/* Animated Cards */
+.floating-cards {
+  position: relative;
+  height: 300px;
+}
+
+.float-card {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  animation: float-card 6s ease-in-out infinite;
+}
+
+.card-1 {
+  width: 280px;
+  top: 0px;
+  left: 0px;
+  animation-delay: 0s;
+}
+
+.card-2 {
+  width: 240px;
+  top: 130px;
+  left: 100px;
+  animation-delay: -3s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fc-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.fc-title {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+}
+
+.fc-badge {
+  font-size: 0.6rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fc-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.fc-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00FFD1, #00A8FF);
+}
+
+.fc-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #10b981;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
-              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%),
-              var(--bg-primary);
+  color: #fff;
+}
+
+@keyframes float-card {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Background elements */
+.grid-noise-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.geometric-bg-1 {
+  position: absolute;
+  top: -20%; left: -20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0, 255, 209, 0.15) 0%, transparent 60%);
+  border-radius: 50%;
+  z-index: 0;
+  animation: pulseBg 12s infinite alternate;
+}
+
+.geometric-bg-2 {
+  position: absolute;
+  bottom: -20%; right: -20%;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(0, 168, 255, 0.1) 0%, transparent 60%);
+  border-radius: 50%;
+  z-index: 0;
+  animation: pulseBg 15s infinite alternate-reverse;
+}
+
+@keyframes pulseBg {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+/* RIGHT SIDE - FORM */
+.auth-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1A1A2E;
+  position: relative;
+  z-index: 20;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   padding: 40px;
 }
 
 .auth-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.logo-icon-large {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
-  border-radius: 12px;
-  box-shadow: 0 0 20px var(--accent-glow);
-  margin: 0 auto 20px;
+  margin-bottom: 2.5rem;
 }
 
 .auth-header h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fff;
 }
 
 .auth-header p {
-  color: var(--text-secondary);
+  color: #94a3b8;
+  font-size: 1.05rem;
 }
 
-.auth-error {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--danger);
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  margin-bottom: 24px;
-  font-size: 0.875rem;
-  text-align: center;
+/* Floating Labels Form */
+.floating-form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
 }
 
-.btn-block {
+.floating-input {
   width: 100%;
-  margin-top: 12px;
+  padding: 1.25rem 1rem 0.5rem;
+  font-size: 1rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.floating-input:focus {
+  border-color: #00FFD1;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.floating-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 1rem;
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+}
+
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0.5rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: #00FFD1;
+  font-weight: 500;
+}
+
+/* Submit Button */
+.btn-glowing-teal {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(to right, #00FFD1, #00A8FF);
+  color: #1A1A2E;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 255, 209, 0.2);
+  margin-top: 1rem;
+}
+
+.btn-glowing-teal:hover {
+  box-shadow: 0 6px 20px rgba(0, 255, 209, 0.4);
+  transform: translateY(-2px);
+}
+
+.google-login-center {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+  padding: 0 15px;
+}
+
+/* Google Auth Button */
+.btn-google-oauth {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-google-oauth:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .auth-footer {
-  margin-top: 24px;
+  margin-top: 2rem;
   text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.auth-footer a {
+  color: #00FFD1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 899px) {
+  .auth-split-container {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image: 
+      radial-gradient(circle at top right, rgba(0, 255, 209, 0.1), transparent 40%),
+      radial-gradient(circle at bottom left, rgba(0, 168, 255, 0.1), transparent 40%);
+  }
+  
+  .auth-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
 }

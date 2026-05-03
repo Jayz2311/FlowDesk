@@ -17,7 +17,9 @@ export const getDashboardStats = async (req, res) => {
         totalTasks: 0,
         tasksByStatus: {},
         overdueTasks: 0,
-        tasksAssignedToMe: 0
+        tasksAssignedToMe: 0,
+        recentTasks: [],
+        managerStats: null
       });
     }
 
@@ -53,11 +55,59 @@ export const getDashboardStats = async (req, res) => {
       where: { assigneeId: userId }
     });
 
+    // Fetch actual tasks for the list
+    const recentTasks = await prisma.task.findMany({
+      where: { assigneeId: userId },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: { project: true }
+    });
+
+    // --- MANAGER SPECIFIC STATS ---
+    const adminProjects = await prisma.projectMember.findMany({
+      where: { userId, role: 'Admin' },
+      select: { projectId: true }
+    });
+    const adminProjectIds = adminProjects.map(p => p.projectId);
+
+    let managerStats = null;
+    if (adminProjectIds.length > 0) {
+      const managedProjectsData = await prisma.project.findMany({
+        where: { id: { in: adminProjectIds } },
+        include: {
+          _count: {
+            select: { tasks: true, members: true }
+          },
+          tasks: {
+            select: { status: true }
+          }
+        }
+      });
+
+      managerStats = {
+        projects: managedProjectsData.map(p => {
+          const doneTasks = p.tasks.filter(t => t.status === 'Done').length;
+          return {
+            id: p.id,
+            name: p.name,
+            totalTasks: p._count.tasks,
+            totalMembers: p._count.members,
+            completionRate: p._count.tasks > 0 ? Math.round((doneTasks / p._count.tasks) * 100) : 0
+          };
+        }),
+        totalTeamMembers: await prisma.projectMember.count({
+          where: { projectId: { in: adminProjectIds } }
+        })
+      };
+    }
+
     res.status(200).json({
       totalTasks,
       tasksByStatus,
       overdueTasks,
-      tasksAssignedToMe
+      tasksAssignedToMe,
+      recentTasks,
+      managerStats
     });
 
   } catch (error) {

@@ -10,7 +10,9 @@ export const createTask = async (req, res) => {
       where: { projectId_userId: { projectId, userId } }
     });
 
-    if (!member) return res.status(403).json({ error: 'Not authorized for this project' });
+    if (!member || member.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only admins can create tasks' });
+    }
 
     const task = await prisma.task.create({
       data: {
@@ -50,12 +52,9 @@ export const updateTask = async (req, res) => {
     });
 
     if (!member) return res.status(403).json({ error: 'Not authorized' });
-    if (member.role !== 'Admin' && task.assigneeId !== userId) {
-        // Member can only update their own tasks, but here we will let members update status of unassigned tasks or tasks in their project for collaboration, 
-        // wait, requirements say: "Admin: Manage tasks and users. Member: View and update assigned tasks only"
-        if (member.role === 'Member' && task.assigneeId !== userId) {
-             return res.status(403).json({ error: 'Members can only update assigned tasks' });
-        }
+    
+    if (member.role === 'Member' && task.assigneeId !== userId) {
+      return res.status(403).json({ error: 'Members can only update tasks assigned to them' });
     }
 
     const updatedTask = await prisma.task.update({
@@ -77,5 +76,29 @@ export const updateTask = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to update task' });
+  }
+};
+
+export const deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const task = await prisma.task.findUnique({ where: { id } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    const member = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId: task.projectId, userId } }
+    });
+
+    if (!member || member.role !== 'Admin') {
+        return res.status(403).json({ error: 'Only admins can delete tasks' });
+    }
+
+    await prisma.task.delete({ where: { id } });
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete task' });
   }
 };

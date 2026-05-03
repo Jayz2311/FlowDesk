@@ -110,3 +110,54 @@ export const addMember = async (req, res) => {
     res.status(500).json({ error: 'Failed to add member' });
   }
 };
+
+export const updateMemberRole = async (req, res) => {
+  try {
+    const { id: projectId, memberId } = req.params;
+    const { role } = req.body;
+    const userId = req.user.id;
+
+    // Check if requester is an Admin in this project
+    const requester = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } }
+    });
+
+    if (!requester || requester.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only admins can update roles' });
+    }
+
+    const updatedMember = await prisma.projectMember.update({
+      where: { id: memberId },
+      data: { role }
+    });
+
+    res.status(200).json(updatedMember);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update member role' });
+  }
+};
+
+export const removeMember = async (req, res) => {
+  try {
+    const { id: projectId, memberId } = req.params;
+    const userId = req.user.id;
+
+    const requester = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } }
+    });
+
+    if (!requester || requester.role !== 'Admin') {
+      return res.status(403).json({ error: 'Only admins can remove members' });
+    }
+
+    await prisma.projectMember.delete({
+      where: { id: memberId }
+    });
+
+    res.status(200).json({ message: 'Member removed' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to remove member' });
+  }
+};

@@ -55,3 +55,41 @@ export const login = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential missing' });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,  
+    });
+    const payload = ticket.getPayload();
+    const { email, name, sub } = payload; // sub is the unique Google ID
+
+    // Find user
+    let user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) {
+      // If user doesn't exist, create one. We'll generate a random password
+      // since they log in via Google, they don't need it.
+      const randomPassword = await bcrypt.hash(sub + Date.now().toString(), 10);
+      user = await prisma.user.create({
+        data: { name, email, password: randomPassword }
+      });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d' });
+    res.status(200).json({ message: 'Google Login successful', token, user: { id: user.id, name: user.name, email: user.email } });
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    res.status(500).json({ error: 'Google authentication failed' });
+  }
+};

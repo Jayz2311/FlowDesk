@@ -1,0 +1,81 @@
+.preloader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #1A1A2E;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: 'Inter', sans-serif;
+}
+
+.logo-container {
+  margin-bottom: 2rem;
+  animation: logoPulse 2s infinite ease-in-out;
+}
+
+.loader-logo {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 3rem;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+.loader-logo span {
+  color: #00FFD1;
+}
+
+.bouncing-balls {
+  display: flex;
+  gap: 12px;
+}
+
+.ball {
+  width: 16px;
+  height: 16px;
+  background: #00FFD1;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+  box-shadow: 0 0 15px rgba(0, 255, 209, 0.4);
+}
+
+.ball:nth-child(2) {
+  animation-delay: 0.2s;
+  background: #8b5cf6;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+.ball:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #6366f1;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.loading-text {
+  margin-top: 2rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-20px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 0.8; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1); }
+}
