@@ -2,10 +2,9 @@
 
 FlowDesk is a high-fidelity, full-stack collaborative task management platform designed for modern teams. Built with a focus on rich aesthetics, real-time analytics, and seamless user experience, it allows teams to manage projects, assign tasks, and track productivity through beautiful data visualizations.
 
-![FlowDesk Preview](https://via.placeholder.com/1200x600/1A1A2E/00FFD1?text=FlowDesk+Premium+Task+Management)
 
 ## 🚀 Live Demo
-flowdesk-production-cde1.up.railway.app
+https://flowdesk-production-cde1.up.railway.app
 
 ---
 
